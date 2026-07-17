@@ -4,7 +4,10 @@ import random
 t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
-t.speed(3)  # Visible speed so you see every petal being created!
+t.hideturtle()
+
+# Disable auto-animation so full petals appear instantly per step
+s.tracer(0)
 
 # Base Primary and Secondary color categories (Excluding Green)
 primary_bases = ["red", "blue", "yellow"]
@@ -26,29 +29,38 @@ def get_random_shade(color_type):
     else: # Magenta / Violet
         return f"#{random.randint(200, 255):02x}{random.randint(0, 80):02x}{random.randint(180, 255):02x}"
 
-# Sequence: Primary Shades -> Secondary Shades -> Final Baby Pink
+# Build Color Sequence: Primaries -> Secondaries -> Final Baby Pink
 primary_shades = [get_random_shade(col) for col in primary_bases]
 secondary_shades = [get_random_shade(col) for col in secondary_bases]
 color_sequence = primary_shades + secondary_shades + ["#F4C2C2"]
 
-# Start drawing position
-t.penup()
-t.goto(0, -20)
-t.pendown()
-
 total_petals = 24
 petals_per_color = max(1, total_petals // len(color_sequence))
 
-# Draw ONE single flower continuously without wiping or yellow dots
-for i in range(total_petals):
-    # Pick current color phase based on petal progress
-    color_idx = min(i // petals_per_color, len(color_sequence) - 1)
+def bloom_step(current_petal=1):
+    if current_petal > total_petals:
+        return  # Flower fully bloomed!
+
+    t.clear()  # Re-render active flower structure so ALL petals match current color phase
+    t.penup()
+    t.goto(0, -20)
+    t.pendown()
+
+    # Determine current phase color (All petals match this exact color)
+    color_idx = min((current_petal - 1) // petals_per_color, len(color_sequence) - 1)
     t.color(color_sequence[color_idx])
 
-    # Draw both sides of the petal in the SAME color
-    t.circle(80, 90)
-    t.left(90)
-    t.circle(80, 90)
-    t.left(15)  # Angle turn for next petal
+    # Draw all blooming petals up to current_petal as whole complete petals
+    for i in range(current_petal):
+        t.circle(80, 90)
+        t.left(90)
+        t.circle(80, 90)
+        t.left(15)
 
-t.hideturtle()
+    s.update()  # Render complete frame instantly
+
+    # Schedule next petal bloom with color shift
+    s.ontimer(lambda: bloom_step(current_petal + 1), 250)
+
+# Start continuous bloom
+bloom_step(1)
