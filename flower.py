@@ -4,7 +4,7 @@ import random
 t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
-t.speed(0)
+t.speed(3)  # Visible speed so you see every petal being created!
 
 # Base Primary and Secondary color categories (Excluding Green)
 primary_bases = ["red", "blue", "yellow"]
@@ -26,47 +26,29 @@ def get_random_shade(color_type):
     else: # Magenta / Violet
         return f"#{random.randint(200, 255):02x}{random.randint(0, 80):02x}{random.randint(180, 255):02x}"
 
-# Sequence: Primary Shades -> Secondary Shades -> Baby Pink
+# Sequence: Primary Shades -> Secondary Shades -> Final Baby Pink
 primary_shades = [get_random_shade(col) for col in primary_bases]
 secondary_shades = [get_random_shade(col) for col in secondary_bases]
 color_sequence = primary_shades + secondary_shades + ["#F4C2C2"]
 
-def draw_seed():
-    """Draws the center seed (beej) growing before blooming"""
-    t.penup()
-    t.goto(0, -10)
-    t.pendown()
-    t.color("gold")
-    t.begin_fill()
-    t.circle(10)
-    t.end_fill()
+# Start drawing position
+t.penup()
+t.goto(0, -20)
+t.pendown()
 
-def bloom_flower(color_index=0):
-    """Animates the flower blooming petal by petal"""
-    if color_index >= len(color_sequence):
-        return  # Fully bloomed!
+total_petals = 24
+petals_per_color = max(1, total_petals // len(color_sequence))
 
-    t.clear()
-    
-    # 1. First, plant/draw the center seed (beej)
-    draw_seed()
+# Draw ONE single flower continuously without wiping or yellow dots
+for i in range(total_petals):
+    # Pick current color phase based on petal progress
+    color_idx = min(i // petals_per_color, len(color_sequence) - 1)
+    t.color(color_sequence[color_idx])
 
-    # 2. Prepare turtle position for petal blooming
-    t.penup()
-    t.goto(0, -20)
-    t.pendown()
-    t.color(color_sequence[color_index])
+    # Draw both sides of the petal in the SAME color
+    t.circle(80, 90)
+    t.left(90)
+    t.circle(80, 90)
+    t.left(15)  # Angle turn for next petal
 
-    # 3. Bloom the 24 petals visibly one by one
-    total_petals = 24
-    for _ in range(total_petals):
-        t.circle(80, 90)
-        t.left(90)
-        t.circle(80, 90)
-        t.left(15)
-
-    # 4. Progressively transition to the next blooming color phase
-    s.ontimer(lambda: bloom_flower(color_index + 1), 700)
-
-# Start execution: seed grows and blooms into a flower!
-bloom_flower(0)
+t.hideturtle()
