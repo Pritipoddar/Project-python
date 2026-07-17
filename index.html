@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Python Scripts Menu</title>
+    <title>Python Turtle Projects</title>
 
-    <!-- PyScript CSS & JS -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <!-- Skulpt Libraries for Turtle Graphics -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/gh/skulpt/skulpt-dist@master/skulpt.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/gh/skulpt/skulpt-dist@master/skulpt-stdlib.js" type="text/javascript"></script>
 
     <style>
       body {
@@ -32,16 +33,23 @@
       button:hover {
         background-color: #2c974b;
       }
-      #output-box {
+      /* Container for Turtle Canvas */
+      #canvas-container {
         margin: 20px auto;
-        padding: 15px;
-        width: 80%;
-        min-height: 200px;
-        background: #ffffff;
-        border: 1px solid #ccc;
+        width: 500px;
+        height: 500px;
+        border: 2px solid #ccc;
         border-radius: 8px;
-        text-align: left;
-        white-space: pre-wrap;
+        background-color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+      #status {
+        font-style: italic;
+        color: #555;
+        margin-top: 10px;
       }
     </style>
   </head>
@@ -52,48 +60,64 @@
 
     <!-- Navigation Buttons -->
     <div class="button-container">
-      <button onclick="runScript('flower.py')">Run Flower</button>
-      <button onclick="runScript('heart.py')">Run Heart</button>
-      <button onclick="runScript('snake.py')">Run Snake</button>
-      <button onclick="runScript('tree.py')">Run Tree</button>
+      <button onclick="runTurtleScript('flower.py')">Run Flower</button>
+      <button onclick="runTurtleScript('heart.py')">Run Heart</button>
+      <button onclick="runTurtleScript('snake.py')">Run Snake</button>
+      <button onclick="runTurtleScript('tree.py')">Run Tree</button>
     </div>
 
-    <!-- Output Display -->
-    <div id="output-box">Select a script above to see the output...</div>
+    <div id="status">Select a project to view the graphics...</div>
 
-    <script>
-      async function runScript(fileName) {
-        const outputDiv = document.getElementById('output-box');
-        outputDiv.innerHTML = `<em>Loading and executing ${fileName}...</em><br/><br/>`;
+    <!-- Screen where Turtle draws -->
+    <div id="canvas-container"></div>
+
+    <script type="text/javascript">
+      function outf(text) {
+        console.log(text);
+      }
+
+      function builtinRead(x) {
+        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+          throw "File not found: '" + x + "'";
+        return Sk.builtinFiles["files"][x];
+      }
+
+      async function runTurtleScript(fileName) {
+        const canvasContainer = document.getElementById("canvas-container");
+        const status = document.getElementById("status");
+
+        // Clear previous canvas
+        canvasContainer.innerHTML = "";
+        status.innerText = `Loading and rendering ${fileName}...`;
 
         try {
-          // Fetch the python file content
+          // Fetch the python file
           const response = await fetch(`./${fileName}`);
-          if (!response.ok) throw new Error("File not found");
+          if (!response.ok) throw new Error("Could not find " + fileName);
           const code = await response.text();
 
-          // Execute python code inside PyScript context
-          const scriptElement = document.createElement('script');
-          scriptElement.type = 'py';
-          scriptElement.innerHTML = `
-import sys
-from js import document
+          // Configure Skulpt Turtle Screen
+          Sk.PreserveGlue = true;
+          Sk.configure({
+            output: outf,
+            read: builtinRead
+          });
 
-# Redirect output to output-box
-class OutputRedirector:
-    def write(self, text):
-        document.getElementById("output-box").innerHTML += text
-    def flush(self):
-        pass
+          (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-container';
 
-sys.stdout = OutputRedirector()
-
-${code}
-          `;
-          outputDiv.innerHTML = ""; // Clear loader
-          document.body.appendChild(scriptElement);
+          // Run Python Code
+          Sk.misceval.asyncToPromise(function() {
+            return Sk.importMainWithBody("<stdin>", false, code, true);
+          }).then(
+            function() {
+              status.innerText = `${fileName} finished executing successfully!`;
+            },
+            function(err) {
+              status.innerText = `Error: ${err.toString()}`;
+            }
+          );
         } catch (err) {
-          outputDiv.innerHTML = `<span style="color:red;">Error loading ${fileName}: ${err.message}</span>`;
+          status.innerText = `Failed to load file: ${err.message}`;
         }
       }
     </script>
