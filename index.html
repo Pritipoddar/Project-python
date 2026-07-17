@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Python Turtle Projects</title>
+    <title>Python Projects Gallery</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/gh/skulpt/skulpt-dist@master/skulpt.min.js" type="text/javascript"></script>
@@ -13,47 +13,56 @@
       body {
         font-family: Arial, sans-serif;
         text-align: center;
+        background-color: #121212;
+        color: #ffffff;
+        margin: 0;
         padding: 20px;
-        background-color: #f4f6f9;
       }
       .button-container {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
       }
       button {
         background-color: #2da44e;
         color: white;
         border: none;
-        padding: 10px 20px;
+        padding: 10px 18px;
         margin: 5px;
-        font-size: 16px;
+        font-size: 15px;
         border-radius: 6px;
         cursor: pointer;
+        font-weight: bold;
       }
       button:hover {
         background-color: #2c974b;
       }
-      #canvas-container {
-        margin: 20px auto;
-        width: 800px;
-        height: 600px;
-        border: 2px solid #ccc;
-        border-radius: 8px;
-        background-color: #ffffff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-      }
       #status {
         font-style: italic;
-        color: #555;
-        margin-top: 10px;
+        color: #aaa;
+        margin-bottom: 15px;
+      }
+      /* Fixed Canvas Container Fixes Skulpt Canvas Centering */
+      #canvas-container {
+        width: 600px;
+        height: 600px;
+        margin: 0 auto;
+        background-color: #000000;
+        border: 2px solid #444;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+      }
+      #canvas-container canvas {
+        width: 600px !important;
+        height: 600px !important;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     </style>
   </head>
   <body>
 
-    <h1>Python Projects</h1>
+    <h2>Python Turtle Projects</h2>
     <p>Click any button below to execute that script:</p>
 
     <div class="button-container">
@@ -63,7 +72,7 @@
       <button onclick="runTurtleScript('tree.py')">Run Tree</button>
     </div>
 
-    <div id="status">Select a project to view the graphics...</div>
+    <div id="status">Select a project to run...</div>
     <div id="canvas-container"></div>
 
     <script type="text/javascript">
@@ -76,29 +85,35 @@
       }
 
       async function runTurtleScript(fileName) {
-        const canvasContainer = document.getElementById("canvas-container");
+        const container = document.getElementById("canvas-container");
         const status = document.getElementById("status");
 
-        canvasContainer.innerHTML = "";
-        status.innerText = `Loading and rendering ${fileName}...`;
+        // Clear previous canvas
+        container.innerHTML = "";
+        status.innerText = `Loading ${fileName}...`;
 
         try {
-          const response = await fetch(`./${fileName}`);
-          if (!response.ok) throw new Error("Could not find " + fileName);
+          // Force fresh fetch bypassing browser cache
+          const response = await fetch(`./${fileName}?nocache=` + new Date().getTime());
+          if (!response.ok) throw new Error("Could not load " + fileName);
           const code = await response.text();
 
           Sk.PreserveGlue = true;
           Sk.configure({ output: outf, read: builtinRead });
+          
+          // Force Skulpt target & dimensions
           (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-container';
+          Sk.TurtleGraphics.width = 600;
+          Sk.TurtleGraphics.height = 600;
 
           Sk.misceval.asyncToPromise(function() {
             return Sk.importMainWithBody("<stdin>", false, code, true);
           }).then(
-            function() { status.innerText = `${fileName} finished executing successfully!`; },
+            function() { status.innerText = `${fileName} executed successfully!`; },
             function(err) { status.innerText = `Error: ${err.toString()}`; }
           );
         } catch (err) {
-          status.innerText = `Failed to load file: ${err.message}`;
+          status.innerText = `Error: ${err.message}`;
         }
       }
     </script>
