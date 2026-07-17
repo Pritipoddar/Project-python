@@ -1,20 +1,15 @@
 import turtle
 
-# Setup screen explicitly for Skulpt canvas
+t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
-s.setup(width=600, height=600)
-
-# Setup turtle pen
-t = turtle.Turtle()
 t.pensize(2)
 t.color("green")
 t.speed(0)
 
-# Position turtle at the bottom-center of the canvas pointing UP
 t.penup()
-t.goto(0, -220)
-t.setheading(90)  # Face upward
+t.goto(0, -200)
+t.setheading(90)
 t.pendown()
 
 def tree(i):
@@ -32,5 +27,5 @@ def tree(i):
         t.left(30)
         t.backward(i)
 
-tree(80)
+tree(70)
 t.hideturtle()
