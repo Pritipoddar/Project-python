@@ -3,9 +3,14 @@ import turtle
 t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
+s.setup(width=600, height=600)
 t.speed(0)
 
-# Pure Python HSV-to-RGB conversion (No colorsys library required)
+# Start centered
+t.penup()
+t.goto(0, -50)
+t.pendown()
+
 def hsv_to_rgb(h, s_val, v):
     i = int(h * 6)
     f = (h * 6) - i
@@ -25,8 +30,9 @@ for i in range(160):
     r, g, b = hsv_to_rgb(h, 1, 1)
     t.color(r, g, b)
     h += 0.005
-    t.circle(120, 90)
+    t.circle(100, 90)  # Scaled down to fit perfectly
     t.left(90)
-    t.circle(120, 90)
+    t.circle(100, 90)
     t.left(18)
+
 t.hideturtle()
