@@ -3,36 +3,20 @@ import turtle
 t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
-s.setup(width=600, height=600)
 t.speed(0)
 
-# Start centered
+# Start centered with smaller radius
 t.penup()
-t.goto(0, -50)
+t.goto(0, 0)
 t.pendown()
 
-def hsv_to_rgb(h, s_val, v):
-    i = int(h * 6)
-    f = (h * 6) - i
-    p = v * (1 - s_val)
-    q = v * (1 - f * s_val)
-    t_val = v * (1 - (1 - f) * s_val)
-    i %= 6
-    if i == 0: return v, t_val, p
-    if i == 1: return q, v, p
-    if i == 2: return p, v, t_val
-    if i == 3: return p, q, v
-    if i == 4: return t_val, p, v
-    if i == 5: return v, p, q
+colors = ["red", "purple", "blue", "green", "yellow", "orange"]
 
-h = 0
-for i in range(160):
-    r, g, b = hsv_to_rgb(h, 1, 1)
-    t.color(r, g, b)
-    h += 0.005
-    t.circle(100, 90)  # Scaled down to fit perfectly
+for i in range(120):
+    t.color(colors[i % 6])
+    t.circle(70, 90)
     t.left(90)
-    t.circle(100, 90)
-    t.left(18)
+    t.circle(70, 90)
+    t.left(15)
 
 t.hideturtle()
