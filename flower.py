@@ -5,25 +5,23 @@ t = turtle.Turtle()
 s = turtle.Screen()
 s.bgcolor("black")
 t.speed(0)
+t.hideturtle()
 
-# Start centered
-t.penup()
-t.goto(0, -20)
-t.pendown()
+# Turn off automatic screen updates for clean color transitions
+s.tracer(0)
 
-# Base Primary and Secondary colors (Excluding Green as requested)
+# Base Primary and Secondary color categories (Excluding Green)
 primary_bases = ["red", "blue", "yellow"]
-secondary_bases = ["orange", "purple", "magenta", "violet", "cyan"]
+secondary_bases = ["orange", "purple", "magenta", "cyan"]
 
-# Helper function to generate a random hex shade from base colors
+# Helper function to generate dynamic shades
 def get_random_shade(color_type):
-    # Generates vibrant shades while avoiding green tones
     if color_type == "red":
-        return f"#{random.randint(200, 255):02x}{random.randint(0, 50):02x}{random.randint(0, 50):02x}"
+        return f"#{random.randint(200, 255):02x}{random.randint(0, 40):02x}{random.randint(0, 40):02x}"
     elif color_type == "blue":
-        return f"#{random.randint(0, 50):02x}{random.randint(50, 120):02x}{random.randint(200, 255):02x}"
+        return f"#{random.randint(0, 40):02x}{random.randint(60, 140):02x}{random.randint(200, 255):02x}"
     elif color_type == "yellow":
-        return f"#{random.randint(220, 255):02x}{random.randint(200, 240):02x}{random.randint(0, 50):02x}"
+        return f"#{random.randint(220, 255):02x}{random.randint(200, 245):02x}{random.randint(0, 40):02x}"
     elif color_type == "orange":
         return f"#{random.randint(230, 255):02x}{random.randint(100, 160):02x}{random.randint(0, 30):02x}"
     elif color_type == "purple":
@@ -33,28 +31,34 @@ def get_random_shade(color_type):
     else: # Magenta / Violet
         return f"#{random.randint(200, 255):02x}{random.randint(0, 80):02x}{random.randint(180, 255):02x}"
 
-# Create a sequence of colors for each full petal layer
-# 1. Primary shades
+# Generate sequence: Primary Shades -> Secondary Shades -> Baby Pink
 primary_shades = [get_random_shade(col) for col in primary_bases]
-# 2. Secondary shades
 secondary_shades = [get_random_shade(col) for col in secondary_bases]
+color_sequence = primary_shades + secondary_shades + ["#F4C2C2"]  # Final Baby Pink
 
-# Combine: Primaries -> Secondaries -> Final Baby Pink layer
-color_palette = primary_shades + secondary_shades + ["#F4C2C2"] # Baby Pink
+# Function to draw the complete flower in one single uniform color
+def draw_full_flower(color_hex):
+    t.clear()
+    t.penup()
+    t.goto(0, -20)
+    t.pendown()
+    t.color(color_hex)
+    
+    # Draw all 24 petals in the EXACT same color
+    for _ in range(24):
+        t.circle(80, 90)
+        t.left(90)
+        t.circle(80, 90)
+        t.left(15)
+        
+    s.update() # Render the completed flower on screen
 
-# Total petals and petals per color phase
-total_petals = 24
-petals_per_layer = max(1, total_petals // len(color_palette))
+# Animate color progression step by step
+def animate_color_transition(step=0):
+    if step < len(color_sequence):
+        draw_full_flower(color_sequence[step])
+        # Change color every 600ms
+        s.ontimer(lambda: animate_color_transition(step + 1), 600)
 
-for i in range(total_petals):
-    # Determine the color for the entire petal layer
-    color_index = min(i // petals_per_layer, len(color_palette) - 1)
-    t.color(color_palette[color_index])
-
-    # Draw one full petal (both sides) in the same color
-    t.circle(80, 90)
-    t.left(90)
-    t.circle(80, 90)
-    t.left(15)  # Rotate for the next petal position
-
-t.hideturtle()
+# Start animation
+animate_color_transition(0)
