@@ -33,7 +33,6 @@
       button:hover {
         background-color: #2c974b;
       }
-      /* Container for Turtle Canvas */
       #canvas-container {
         margin: 20px auto;
         width: 500px;
@@ -58,7 +57,7 @@
     <h1>Python Projects</h1>
     <p>Click any button below to execute that script:</p>
 
-    <!-- Navigation Buttons -->
+    <!-- Buttons -->
     <div class="button-container">
       <button onclick="runTurtleScript('flower.py')">Run Flower</button>
       <button onclick="runTurtleScript('heart.py')">Run Heart</button>
@@ -86,17 +85,14 @@
         const canvasContainer = document.getElementById("canvas-container");
         const status = document.getElementById("status");
 
-        // Clear previous canvas
         canvasContainer.innerHTML = "";
         status.innerText = `Loading and rendering ${fileName}...`;
 
         try {
-          // Fetch the python file
           const response = await fetch(`./${fileName}`);
           if (!response.ok) throw new Error("Could not find " + fileName);
           const code = await response.text();
 
-          // Configure Skulpt Turtle Screen
           Sk.PreserveGlue = true;
           Sk.configure({
             output: outf,
@@ -105,7 +101,6 @@
 
           (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-container';
 
-          // Run Python Code
           Sk.misceval.asyncToPromise(function() {
             return Sk.importMainWithBody("<stdin>", false, code, true);
           }).then(
