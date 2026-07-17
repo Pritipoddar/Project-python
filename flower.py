@@ -6,7 +6,7 @@ s = turtle.Screen()
 s.bgcolor("black")
 t.hideturtle()
 
-# Disable auto-animation so full petals appear instantly per step
+# Turn off automatic drawing animation so frames transition smoothly
 s.tracer(0)
 
 # Base Primary and Secondary color categories (Excluding Green)
@@ -29,38 +29,35 @@ def get_random_shade(color_type):
     else: # Magenta / Violet
         return f"#{random.randint(200, 255):02x}{random.randint(0, 80):02x}{random.randint(180, 255):02x}"
 
-# Build Color Sequence: Primaries -> Secondaries -> Final Baby Pink
+# Sequence: Primary Shades -> Secondary Shades -> Final Baby Pink
 primary_shades = [get_random_shade(col) for col in primary_bases]
 secondary_shades = [get_random_shade(col) for col in secondary_bases]
 color_sequence = primary_shades + secondary_shades + ["#F4C2C2"]
 
-total_petals = 24
-petals_per_color = max(1, total_petals // len(color_sequence))
-
-def bloom_step(current_petal=1):
-    if current_petal > total_petals:
-        return  # Flower fully bloomed!
-
-    t.clear()  # Re-render active flower structure so ALL petals match current color phase
+def draw_static_flower(color_hex):
+    """Draws the entire flower cleanly at a fixed position in a single color"""
+    t.clear()
     t.penup()
     t.goto(0, -20)
+    t.setheading(0)  # Fixed orientation so it never rotates
     t.pendown()
+    t.color(color_hex)
 
-    # Determine current phase color (All petals match this exact color)
-    color_idx = min((current_petal - 1) // petals_per_color, len(color_sequence) - 1)
-    t.color(color_sequence[color_idx])
-
-    # Draw all blooming petals up to current_petal as whole complete petals
-    for i in range(current_petal):
+    # Draw all 24 petals in exact fixed alignment
+    for _ in range(24):
         t.circle(80, 90)
         t.left(90)
         t.circle(80, 90)
         t.left(15)
 
-    s.update()  # Render complete frame instantly
+    s.update()  # Render frame instantly
 
-    # Schedule next petal bloom with color shift
-    s.ontimer(lambda: bloom_step(current_petal + 1), 250)
+def transition_color_phases(step=0):
+    if step < len(color_sequence):
+        # Update the entire flower's color simultaneously
+        draw_static_flower(color_sequence[step])
+        # Smoothly move to next color phase every 500ms
+        s.ontimer(lambda: transition_color_phases(step + 1), 500)
 
-# Start continuous bloom
-bloom_step(1)
+# Start static blooming color shift
+transition_color_phases(0)
