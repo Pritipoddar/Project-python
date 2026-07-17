@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Python Scripts Menu</title>
+
+    <!-- PyScript CSS & JS -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f6f9;
+      }
+      .button-container {
+        margin-bottom: 20px;
+      }
+      button {
+        background-color: #2da44e;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #2c974b;
+      }
+      #output-box {
+        margin: 20px auto;
+        padding: 15px;
+        width: 80%;
+        min-height: 200px;
+        background: #ffffff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-align: left;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>Python Projects</h1>
+    <p>Click any button below to execute that script:</p>
+
+    <!-- Navigation Buttons -->
+    <div class="button-container">
+      <button onclick="runScript('flower.py')">Run Flower</button>
+      <button onclick="runScript('heart.py')">Run Heart</button>
+      <button onclick="runScript('snake.py')">Run Snake</button>
+      <button onclick="runScript('tree.py')">Run Tree</button>
+    </div>
+
+    <!-- Output Display -->
+    <div id="output-box">Select a script above to see the output...</div>
+
+    <script>
+      async function runScript(fileName) {
+        const outputDiv = document.getElementById('output-box');
+        outputDiv.innerHTML = `<em>Loading and executing ${fileName}...</em><br/><br/>`;
+
+        try {
+          // Fetch the python file content
+          const response = await fetch(`./${fileName}`);
+          if (!response.ok) throw new Error("File not found");
+          const code = await response.text();
+
+          // Execute python code inside PyScript context
+          const scriptElement = document.createElement('script');
+          scriptElement.type = 'py';
+          scriptElement.innerHTML = `
+import sys
+from js import document
+
+# Redirect output to output-box
+class OutputRedirector:
+    def write(self, text):
+        document.getElementById("output-box").innerHTML += text
+    def flush(self):
+        pass
+
+sys.stdout = OutputRedirector()
+
+${code}
+          `;
+          outputDiv.innerHTML = ""; // Clear loader
+          document.body.appendChild(scriptElement);
+        } catch (err) {
+          outputDiv.innerHTML = `<span style="color:red;">Error loading ${fileName}: ${err.message}</span>`;
+        }
+      }
+    </script>
+
+  </body>
+</html>
